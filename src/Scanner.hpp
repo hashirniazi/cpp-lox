@@ -14,6 +14,28 @@ private:
     int current = 0;
     int line = 1;
 
+    // Helpers we will implement in the .cpp file
+    bool match(char expected);
+    void scanToken();
+    void addToken(TokenType type);
+    void addToken(TokenType type, Literal literal);
+    char advance();
+    void string();
+    void peekNext();
+    
+    bool isDigit(char c) {
+    return c >= '0' && c <= '9';
+}
+
+    bool isAtEnd() {
+    return current >= source.length();
+}
+
+char peek() {
+    if (isAtEnd()) return '\0';
+    return source[current];
+}
+
 public:
     // Constructor
     Scanner(std::string source);
