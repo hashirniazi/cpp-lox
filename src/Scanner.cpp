@@ -31,6 +31,23 @@ bool Scanner::match(char expected) {
     return true;
 }
 
+void Scanner::number() {
+    while (isDigit(peek())) advance();
+
+    // Look for a fractional part.
+    if (peek() == '.' && isDigit(peekNext())) {
+        // Consume the "."
+        advance();
+
+        while (isDigit(peek())) advance();
+    }
+
+    // Extract the string and convert to double
+    std::string text = source.substr(start, current - start);
+    double value = std::stod(text);
+    addToken(TokenType::NUMBER, value);
+}
+
 void Scanner::string() {
     while (peek() != '"' && !isAtEnd()) {
         if (peek() == '\n') line++;
@@ -112,8 +129,6 @@ void Scanner::scanToken() {
                 error(line, "Unexpected character.");
             }
 
-            // If it's a character we don't recognize, we report it!
-            error(line, "Unexpected character.");
             break;
     }
 }
