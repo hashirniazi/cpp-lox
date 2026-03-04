@@ -3,9 +3,8 @@
 #include <fstream>
 #include <sstream>
 #include <vector>
-// We will uncomment these once we create the files!
-// #include "Scanner.hpp"
-// #include "Token.hpp"
+#include "Scanner.hpp"
+#include "Token.hpp"
 
 bool hadError = false;
 
