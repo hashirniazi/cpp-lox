@@ -23,12 +23,39 @@ void Scanner::addToken(TokenType type, Literal literal) {
     tokens.push_back(Token(type, text, literal, line));
 }
 
+bool isAlpha(char c) {
+        return (c >= 'a' && c <= 'z') ||
+               (c >= 'A' && c <= 'Z') ||
+               c == '_';
+    }
+
+bool isAlphaNumeric(char c) {
+        return isAlpha(c) || isDigit(c);
+    }
+
 bool Scanner::match(char expected) {
     if (isAtEnd()) return false;
     if (source[current] != expected) return false;
     
     current++; // We found it, so consume it!
     return true;
+}
+
+void Scanner::identifier() {
+    while (isAlphaNumeric(peek())) advance();
+
+    // Extract the exact word we just scanned
+    std::string text = source.substr(start, current - start);
+
+    TokenType type;
+    // Check if it's a reserved keyword
+    if (keywords.find(text) != keywords.end()) {
+        type = keywords.at(text); 
+    } else {
+        type = TokenType::IDENTIFIER; // Fall back to regular identifier
+    }
+
+    addToken(type);
 }
 
 void Scanner::number() {
@@ -125,10 +152,11 @@ void Scanner::scanToken() {
         default:
             if (isDigit(c)) {
                 number();
+            } else if (isAlpha(c)) {
+                identifier();
             } else {
                 error(line, "Unexpected character.");
             }
-
             break;
     }
 }
