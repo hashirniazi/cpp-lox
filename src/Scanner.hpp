@@ -22,8 +22,11 @@ private:
     void addToken(TokenType type, Literal literal);
     char advance();
     void string();
-    void peekNext();
-
+    char peekNext();
+    void number();
+    void identifier();
+    bool isAlpha(char c);
+    bool isAlphaNumeric(char c);
     const std::unordered_map<std::string, TokenType> keywords = {
         {"and",    TokenType::AND},
         {"class",  TokenType::CLASS},
@@ -42,7 +45,7 @@ private:
         {"var",    TokenType::VAR},
         {"while",  TokenType::WHILE}
     };
-    
+
     bool isDigit(char c) {
     return c >= '0' && c <= '9';
 }
