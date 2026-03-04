@@ -23,13 +23,13 @@ void Scanner::addToken(TokenType type, Literal literal) {
     tokens.push_back(Token(type, text, literal, line));
 }
 
-bool isAlpha(char c) {
+bool Scanner::isAlpha(char c) {
         return (c >= 'a' && c <= 'z') ||
                (c >= 'A' && c <= 'Z') ||
                c == '_';
     }
 
-bool isAlphaNumeric(char c) {
+bool Scanner::isAlphaNumeric(char c) {
         return isAlpha(c) || isDigit(c);
     }
 
