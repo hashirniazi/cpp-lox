@@ -18,7 +18,7 @@ void Scanner::addToken(TokenType type) {
     addToken(type, std::monostate{}); // std::monostate represents our "null" literal
 }
 
-void Scanner::addToken(TokenType type, Literal literal) {
+void Scanner::addToken(TokenType type, LiteralValue literal) {
     std::string text = source.substr(start, current - start);
     tokens.push_back(Token(type, text, literal, line));
 }

@@ -6,17 +6,17 @@
 #include "TokenType.hpp"
 
 // A type alias to make our code cleaner to read
-using Literal = std::variant<std::monostate, std::string, double>;
+using LiteralValue = std::variant<std::monostate, std::string, double>;
 
 class Token {
 public:
     const TokenType type;
     const std::string lexeme;
-    const Literal literal;
+    const LiteralValue literal;
     const int line;
 
-    Token(TokenType type, std::string lexeme, Literal literal, int line)
-        : type(type), lexeme(lexeme), literal(literal), line(line) {}
+    Token(TokenType type, std::string lexeme, LiteralValue literal, int line)
+        : type(type), lexeme(lexeme), literal(std::move(literal)), line(line) {}
 
     std::string toString() const {
         std::string literalText = "null";

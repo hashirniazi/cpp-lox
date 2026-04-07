@@ -19,7 +19,7 @@ private:
     bool match(char expected);
     void scanToken();
     void addToken(TokenType type);
-    void addToken(TokenType type, Literal literal);
+    void addToken(TokenType type, LiteralValue literal);
     char advance();
     void string();
     char peekNext();
