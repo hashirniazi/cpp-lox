@@ -1,3 +1,4 @@
+#include "AstPrinter.hpp"
 #include <iostream>
 #include <string>
 #include <fstream>
@@ -53,14 +54,42 @@ void runPrompt() {
     }
 }
 
+// int main(int argc, char* argv[]) {
+//     if (argc > 2) {
+//         std::cout << "Usage: cpplox [script]\n";
+//         return 64;
+//     } else if (argc == 2) {
+//         runFile(argv[1]);
+//     } else {
+//         runPrompt();
+//     }
+//     return 0;
+// }
+
 int main(int argc, char* argv[]) {
-    if (argc > 2) {
-        std::cout << "Usage: cpplox [script]\n";
-        return 64;
-    } else if (argc == 2) {
-        runFile(argv[1]);
-    } else {
-        runPrompt();
-    }
+    // We are going to build the tree for the expression: -123 * (45.67)
+    
+    // 1. Create the -123 Unary node
+    std::unique_ptr<Expr> left = std::make_unique<Unary>(
+        Token{TokenType::MINUS, "-", std::monostate{}, 1},
+        std::make_unique<Literal>(123.0)
+    );
+
+    // 2. Create the (45.67) Grouping node
+    std::unique_ptr<Expr> right = std::make_unique<Grouping>(
+        std::make_unique<Literal>(45.67)
+    );
+
+    // 3. Combine them into a Binary node with the * operator
+    std::unique_ptr<Expr> expression = std::make_unique<Binary>(
+        std::move(left),
+        Token{TokenType::STAR, "*", std::monostate{}, 1},
+        std::move(right)
+    );
+
+    // 4. Print it!
+    AstPrinter printer;
+    std::cout << printer.print(expression.get()) << "\n";
+
     return 0;
 }
