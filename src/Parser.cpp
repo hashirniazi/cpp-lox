@@ -41,6 +41,22 @@ bool Parser::match(std::initializer_list<TokenType> types) {
     return false;
 }
 
+// Throws a custom ParseError if the token doesn't match
+Token Parser::consume(TokenType type, std::string message) {
+    if (check(type)) return advance();
+
+    throw error(peek(), message);
+}
+
+// Creates an error and reports it to our main Lox class
+Parser::ParseError Parser::error(Token token, std::string message) {
+    // We will assume you have an 'error' function in your main program 
+    // that prints to the console. Bob uses this to track if the code has errors.
+    // Lox::error(token, message); 
+    
+    return ParseError(message);
+}
+
 // The very top rule just kicks things off
 std::unique_ptr<Expr> Parser::expression() {
     return equality();
