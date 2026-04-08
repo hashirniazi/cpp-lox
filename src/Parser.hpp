@@ -42,6 +42,8 @@ private:
 
 public:
     Parser(const std::vector<Token>& tokens);
+    
+    std::unique_ptr<Expr> parse();
 };
 
 #endif

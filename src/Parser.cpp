@@ -1,5 +1,7 @@
 #include "Parser.hpp"
 
+extern void error(const Token& token, const std::string& message);
+
 Parser::Parser(const std::vector<Token>& tokens) : tokens(tokens) {}
 
 // Returns the token we are currently looking at
@@ -52,9 +54,35 @@ Token Parser::consume(TokenType type, std::string message) {
 Parser::ParseError Parser::error(Token token, std::string message) {
     // We will assume you have an 'error' function in your main program 
     // that prints to the console. Bob uses this to track if the code has errors.
-    // Lox::error(token, message); 
+    ::error(token, message); 
     
     return ParseError(message);
+}
+
+void Parser::synchronize() {
+    // Skip the token that caused the error
+    advance();
+
+    // Keep discarding tokens until we find a safe boundary
+    while (!isAtEnd()) {
+        if (previous().type == TokenType::SEMICOLON) return;
+
+        switch (peek().type) {
+            case TokenType::CLASS:
+            case TokenType::FUN:
+            case TokenType::VAR:
+            case TokenType::FOR:
+            case TokenType::IF:
+            case TokenType::WHILE:
+            case TokenType::PRINT:
+            case TokenType::RETURN:
+                return; // Safe boundary found!
+            default:
+                break; // Keep discarding...
+        }
+
+        advance();
+    }
 }
 
 // The very top rule just kicks things off
@@ -149,4 +177,13 @@ std::unique_ptr<Expr> Parser::primary() {
 
     // If we get here, the token doesn't start any known expression!
     throw error(peek(), "Expect expression.");
+}
+
+std::unique_ptr<Expr> Parser::parse() {
+    try {
+        return expression();
+    } catch (ParseError& error) {
+        // If we hit a syntax error, return a null pointer instead of a tree
+        return nullptr;
+    }
 }
