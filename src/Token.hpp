@@ -6,7 +6,7 @@
 #include "TokenType.hpp"
 
 // A type alias to make our code cleaner to read
-using LiteralValue = std::variant<std::monostate, std::string, double>;
+using LiteralValue = std::variant<std::monostate, std::string, double, bool>;
 
 class Token {
 public:

@@ -39,6 +39,9 @@ public:
             if (str.back() == '.') str += "0";
             return str;
         }
+        if (std::holds_alternative<bool>(expr.value)) {
+            return std::get<bool>(expr.value) ? std::string("true") : std::string("false");
+        }
         return std::string("");
     }
 
