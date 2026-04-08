@@ -64,3 +64,40 @@ std::unique_ptr<Expr> Parser::equality() {
 
     return expr;
 }
+
+std::unique_ptr<Expr> Parser::comparison() {
+    std::unique_ptr<Expr> expr = term();
+
+    while (match({TokenType::GREATER, TokenType::GREATER_EQUAL, TokenType::LESS, TokenType::LESS_EQUAL})) {
+        Token op = previous();
+        std::unique_ptr<Expr> right = term();
+        expr = std::make_unique<Binary>(std::move(expr), std::move(op), std::move(right));
+    }
+
+    return expr;
+}
+
+std::unique_ptr<Expr> Parser::term() {
+    std::unique_ptr<Expr> expr = factor();
+
+    while (match({TokenType::MINUS, TokenType::PLUS})) {
+        Token op = previous();
+        std::unique_ptr<Expr> right = factor();
+        expr = std::make_unique<Binary>(std::move(expr), std::move(op), std::move(right));
+    }
+
+    return expr;
+}
+
+std::unique_ptr<Expr> Parser::factor() {
+    std::unique_ptr<Expr> expr = unary();
+
+    while (match({TokenType::SLASH, TokenType::STAR})) {
+        Token op = previous();
+        std::unique_ptr<Expr> right = unary();
+        expr = std::make_unique<Binary>(std::move(expr), std::move(op), std::move(right));
+    }
+
+    return expr;
+}
+
