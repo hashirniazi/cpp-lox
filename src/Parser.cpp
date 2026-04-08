@@ -40,3 +40,27 @@ bool Parser::match(std::initializer_list<TokenType> types) {
     }
     return false;
 }
+
+// The very top rule just kicks things off
+std::unique_ptr<Expr> Parser::expression() {
+    return equality();
+}
+
+// Translates: equality -> comparison ( ( "!=" | "==" ) comparison )* ;
+std::unique_ptr<Expr> Parser::equality() {
+    // 1. Grab the left side
+    std::unique_ptr<Expr> expr = comparison();
+
+    // 2. Loop as long as we see a matching operator
+    while (match({TokenType::BANG_EQUAL, TokenType::EQUAL_EQUAL})) {
+        Token op = previous();
+        
+        // 3. Grab the right side
+        std::unique_ptr<Expr> right = comparison();
+        
+        // 4. Combine them into a new Binary node, which becomes the new "left"
+        expr = std::make_unique<Binary>(std::move(expr), std::move(op), std::move(right));
+    }
+
+    return expr;
+}
