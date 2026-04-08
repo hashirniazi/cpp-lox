@@ -101,3 +101,36 @@ std::unique_ptr<Expr> Parser::factor() {
     return expr;
 }
 
+std::unique_ptr<Expr> Parser::unary() {
+    // If we see a ! or -
+    if (match({TokenType::BANG, TokenType::MINUS})) {
+        Token op = previous();
+        std::unique_ptr<Expr> right = unary(); // Recursive call!
+        return std::make_unique<Unary>(std::move(op), std::move(right));
+    }
+
+    // Otherwise, it must be a primary expression
+    return primary();
+}
+
+std::unique_ptr<Expr> Parser::primary() {
+    if (match({TokenType::FALSE})) return std::make_unique<Literal>(false);
+    if (match({TokenType::TRUE})) return std::make_unique<Literal>(true);
+    if (match({TokenType::NIL})) return std::make_unique<Literal>(std::monostate{});
+
+    if (match({TokenType::NUMBER, TokenType::STRING})) {
+        return std::make_unique<Literal>(previous().literal);
+    }
+
+    if (match({TokenType::LEFT_PAREN})) {
+        std::unique_ptr<Expr> expr = expression();
+        
+        // We must find a closing parenthesis, or it's a syntax error!
+        consume(TokenType::RIGHT_PAREN, "Expect ')' after expression.");
+        
+        return std::make_unique<Grouping>(std::move(expr));
+    }
+
+    // If we get here, the token doesn't start any known expression!
+    throw error(peek(), "Expect expression.");
+}
