@@ -1,4 +1,3 @@
-#include "AstPrinter.hpp"
 #include <iostream>
 #include <string>
 #include <fstream>
@@ -6,6 +5,9 @@
 #include <vector>
 #include "Scanner.hpp"
 #include "Token.hpp"
+#include "AstPrinter.hpp"
+#include "Parser.hpp"
+#include "Expr.hpp"
 
 bool hadError = false;
 
@@ -18,15 +20,35 @@ void report(int line, const std::string& where, const std::string& message) {
 void error(int line, const std::string& message) {
     report(line, "", message);
 }
+// For parse errors
+void error(const Token& token, const std::string& message) {
+    if (token.type == TokenType::END_OF_FILE) {
+        report(token.line, " at end", message);
+    } else {
+        report(token.line, " at '" + token.lexeme + "'", message);
+    }
+}
 
 void run(const std::string& source) {
+    // 1. Scan the text into tokens
     Scanner scanner(source);
     std::vector<Token> tokens = scanner.scanTokens();
 
-    for (const auto& token : tokens) {
-        std::cout << token.toString() << "\n";
+    // 2. Parse the tokens into a syntax tree
+    Parser parser(tokens);
+    std::unique_ptr<Expr> expression = parser.parse();
+
+    // 3. Stop if there was a syntax error
+    // (If parse() panics and fails, it returns a nullptr)
+    if (hadError || expression == nullptr) {
+        return; 
     }
+
+    // 4. Print the tree!
+    AstPrinter printer;
+    std::cout << printer.print(expression.get()) << "\n";
 }
+
 void runFile(const std::string& path) {
     std::ifstream file(path);
     if (!file.is_open()) {
@@ -54,42 +76,14 @@ void runPrompt() {
     }
 }
 
-// int main(int argc, char* argv[]) {
-//     if (argc > 2) {
-//         std::cout << "Usage: cpplox [script]\n";
-//         return 64;
-//     } else if (argc == 2) {
-//         runFile(argv[1]);
-//     } else {
-//         runPrompt();
-//     }
-//     return 0;
-// }
-
 int main(int argc, char* argv[]) {
-    // We are going to build the tree for the expression: -123 * (45.67)
-    
-    // 1. Create the -123 Unary node
-    std::unique_ptr<Expr> left = std::make_unique<Unary>(
-        Token{TokenType::MINUS, "-", std::monostate{}, 1},
-        std::make_unique<Literal>(123.0)
-    );
-
-    // 2. Create the (45.67) Grouping node
-    std::unique_ptr<Expr> right = std::make_unique<Grouping>(
-        std::make_unique<Literal>(45.67)
-    );
-
-    // 3. Combine them into a Binary node with the * operator
-    std::unique_ptr<Expr> expression = std::make_unique<Binary>(
-        std::move(left),
-        Token{TokenType::STAR, "*", std::monostate{}, 1},
-        std::move(right)
-    );
-
-    // 4. Print it!
-    AstPrinter printer;
-    std::cout << printer.print(expression.get()) << "\n";
-
+    if (argc > 2) {
+        std::cout << "Usage: cpplox [script]\n";
+        return 64;
+    } else if (argc == 2) {
+        runFile(argv[1]);
+    } else {
+        runPrompt();
+    }
     return 0;
 }
