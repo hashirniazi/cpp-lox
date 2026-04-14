@@ -1,6 +1,7 @@
 #ifndef INTERPRETER_HPP
 #define INTERPRETER_HPP
 
+#include <iostream>
 #include "Expr.hpp"
 #include "Token.hpp"   // Needed for the Token in our helper and error
 #include <any>
@@ -23,6 +24,8 @@ public:
     std::any visitUnary(Unary& expr) override;
     std::any visitBinary(Binary& expr) override;
 
+    void interpret(Expr* expression);
+
 private:
     std::any evaluate(Expr* expr);
     
@@ -30,6 +33,8 @@ private:
     bool isTruthy(const std::any& object);
     bool isEqual(const std::any& a, const std::any& b);
     void checkNumberOperands(Token op, const std::any& left, const std::any& right);
+
+    std::string stringify(const std::any& object);
 };
 
 #endif

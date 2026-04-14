@@ -25,6 +25,36 @@ void Interpreter::checkNumberOperands(Token op, const std::any& left, const std:
     throw RuntimeError(op, "Operands must be numbers.");
 }
 
+std::string Interpreter::stringify(const std::any& object) {
+    // 1. Handle nil
+    if (!object.has_value()) return "nil";
+
+    // 2. Handle numbers
+    if (object.type() == typeid(double)) {
+        std::string text = std::to_string(std::any_cast<double>(object));
+        
+        // Lox prints integers without the decimal (e.g., "5" instead of "5.000000")
+        // This strips the trailing zeros and the decimal point if it's a whole number.
+        text.erase(text.find_last_not_of('0') + 1, std::string::npos);
+        if (text.back() == '.') {
+            text.pop_back();
+        }
+        return text;
+    }
+
+    // 3. Handle booleans
+    if (object.type() == typeid(bool)) {
+        return std::any_cast<bool>(object) ? "true" : "false";
+    }
+
+    // 4. Handle strings
+    if (object.type() == typeid(std::string)) {
+        return std::any_cast<std::string>(object);
+    }
+
+    return "unknown";
+}
+
 bool Interpreter::isEqual(const std::any& a, const std::any& b) {
     // 1. If both are nil, they are equal.
     if (!a.has_value() && !b.has_value()) return true;
@@ -136,4 +166,13 @@ std::any Interpreter::visitBinary(Binary& expr) {
     }
 
     return std::any(); // Unreachable
+}
+
+void Interpreter::interpret(Expr* expression) {
+    try {
+        std::any value = evaluate(expression);
+        std::cout << stringify(value) << "\n";
+    } catch (const RuntimeError& error) {
+        std::cerr << error.what() << "\n[line " << error.token.line << "]\n";
+    }
 }
