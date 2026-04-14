@@ -1,4 +1,5 @@
 #include "Interpreter.hpp"
+extern void runtimeError(const RuntimeError& error);
 
 std::any Interpreter::visitLiteral(Literal& expr) {
     if (std::holds_alternative<double>(expr.value)) {
@@ -13,6 +14,13 @@ std::any Interpreter::visitLiteral(Literal& expr) {
     
     // If it's std::monostate (nil), we return an empty std::any
     return std::any(); 
+}
+
+void Interpreter::checkNumberOperand(Token op, const std::any& operand) {
+    if (operand.type() == typeid(double)) return;
+    
+    // If it's not a number, throw our safe Lox error!
+    throw RuntimeError(op, "Operand must be a number.");
 }
 
 void Interpreter::checkNumberOperands(Token op, const std::any& left, const std::any& right) {
@@ -96,6 +104,7 @@ std::any Interpreter::visitUnary(Unary& expr) {
     // 2. Apply the operator
     switch (expr.op.type) {
         case TokenType::MINUS:
+            checkNumberOperand(expr.op, right);
             // Cast the std::any back to a double before making it negative
             return -std::any_cast<double>(right);
         case TokenType::BANG:
@@ -173,6 +182,6 @@ void Interpreter::interpret(Expr* expression) {
         std::any value = evaluate(expression);
         std::cout << stringify(value) << "\n";
     } catch (const RuntimeError& error) {
-        std::cerr << error.what() << "\n[line " << error.token.line << "]\n";
+        runtimeError(error); // Call our global function instead!
     }
 }

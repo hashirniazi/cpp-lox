@@ -33,7 +33,8 @@ private:
     bool isTruthy(const std::any& object);
     bool isEqual(const std::any& a, const std::any& b);
     void checkNumberOperands(Token op, const std::any& left, const std::any& right);
-
+    void checkNumberOperand(Token op, const std::any& operand);
+    
     std::string stringify(const std::any& object);
 };
 
