@@ -8,6 +8,7 @@
 #include "AstPrinter.hpp"
 #include "Parser.hpp"
 #include "Expr.hpp"
+#include "Interpreter.hpp"
 
 bool hadError = false;
 
@@ -45,8 +46,8 @@ void run(const std::string& source) {
     }
 
     // 4. Print the tree!
-    AstPrinter printer;
-    std::cout << printer.print(expression.get()) << "\n";
+    Interpreter interpreter;
+    interpreter.interpret(expression.get());
 }
 
 void runFile(const std::string& path) {
