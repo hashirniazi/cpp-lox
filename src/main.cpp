@@ -11,6 +11,16 @@
 #include "Interpreter.hpp"
 
 bool hadError = false;
+bool hadRuntimeError = false;
+
+// Move the interpreter to the global scope so it retains memory between lines!
+Interpreter interpreter; 
+
+// A dedicated function to handle runtime errors
+void runtimeError(const RuntimeError& error) {
+    std::cerr << error.what() << "\n[line " << error.token.line << "]\n";
+    hadRuntimeError = true;
+}
 
 void report(int line, const std::string& where, const std::string& message) {
     // std::cerr prints to the standard error stream instead of standard output
@@ -31,24 +41,15 @@ void error(const Token& token, const std::string& message) {
 }
 
 void run(const std::string& source) {
-    // 1. Scan the text into tokens
     Scanner scanner(source);
     std::vector<Token> tokens = scanner.scanTokens();
 
-    // 2. Parse the tokens into a syntax tree
     Parser parser(tokens);
     std::unique_ptr<Expr> expression = parser.parse();
 
-    // 3. Stop if there was a syntax error
-    // (If parse() panics and fails, it returns a nullptr)
     if (hadError || expression == nullptr) {
         return; 
     }
-
-    // 4. Print the tree!
-    Interpreter interpreter;
-    interpreter.interpret(expression.get());
-}
 
 void runFile(const std::string& path) {
     std::ifstream file(path);
