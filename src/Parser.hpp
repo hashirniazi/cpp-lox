@@ -4,16 +4,16 @@
 #include <vector>
 #include <memory>
 #include <initializer_list>
-#include <stdexcept> // Needed for std::runtime_error
+#include <stdexcept>
 #include "Token.hpp"
 #include "Expr.hpp"
+#include "Stmt.hpp" 
 
 class Parser {
 private:
     std::vector<Token> tokens;
     int current = 0;
 
-    // --- The Error Struct ---
     struct ParseError : public std::runtime_error {
         ParseError(const std::string& message) : std::runtime_error(message) {}
     };
@@ -32,6 +32,10 @@ private:
     void synchronize();
 
     // --- Grammar Rules ---
+    std::unique_ptr<Stmt> statement();
+    std::unique_ptr<Stmt> printStatement();
+    std::unique_ptr<Stmt> expressionStatement();
+
     std::unique_ptr<Expr> expression();
     std::unique_ptr<Expr> equality();
     std::unique_ptr<Expr> comparison();
@@ -43,7 +47,8 @@ private:
 public:
     Parser(const std::vector<Token>& tokens);
     
-    std::unique_ptr<Expr> parse();
+    
+    std::vector<std::unique_ptr<Stmt>> parse();
 };
 
 #endif

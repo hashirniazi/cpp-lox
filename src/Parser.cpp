@@ -179,11 +179,34 @@ std::unique_ptr<Expr> Parser::primary() {
     throw error(peek(), "Expect expression.");
 }
 
-std::unique_ptr<Expr> Parser::parse() {
-    try {
-        return expression();
-    } catch (ParseError& error) {
-        // If we hit a syntax error, return a null pointer instead of a tree
-        return nullptr;
+std::vector<std::unique_ptr<Stmt>> Parser::parse() {
+    std::vector<std::unique_ptr<Stmt>> statements;
+    
+    while (!isAtEnd()) {
+        statements.push_back(statement());
     }
+
+    return statements;
+}
+
+std::unique_ptr<Stmt> Parser::printStatement() {
+    // 1. Grab the math/text
+    std::unique_ptr<Expr> value = expression();
+    
+    // 2. Demand the semicolon
+    consume(TokenType::SEMICOLON, "Expect ';' after value.");
+    
+    // 3. Package it all up in our new Print node
+    return std::make_unique<Print>(std::move(value));
+}
+
+std::unique_ptr<Stmt> Parser::expressionStatement() {
+    // 1. Grab the math/text
+    std::unique_ptr<Expr> expr = expression();
+    
+    // 2. Demand the semicolon
+    consume(TokenType::SEMICOLON, "Expect ';' after expression.");
+    
+    // 3. Package it up in our new Expression node
+    return std::make_unique<Expression>(std::move(expr));
 }
