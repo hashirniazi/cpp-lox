@@ -27,6 +27,18 @@ public:
         // If the variable doesn't exist, we crash the program!
         throw RuntimeError(name, "Undefined variable '" + name.lexeme + "'.");
     }
+
+    // Updates an existing variable
+    void assign(const Token& name, std::any value) {
+        if (values.find(name.lexeme) != values.end()) {
+            values[name.lexeme] = std::move(value);
+            return;
+        }
+
+        // If it doesn't exist, we refuse to create it and crash!
+        throw RuntimeError(name, "Undefined variable '" + name.lexeme + "'.");
+    }
+    
 };
 
 #endif
