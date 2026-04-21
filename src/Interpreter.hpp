@@ -23,6 +23,7 @@ public:
     std::any visitUnary(Unary& expr) override;
     std::any visitBinary(Binary& expr) override;
     void visitVarStmt(Var& stmt) override;
+    std::any visitVariableExpr(Variable& expr) override;
     
     // --- Statement Visitor Methods ---
     void visitPrintStmt(Print& stmt) override; 

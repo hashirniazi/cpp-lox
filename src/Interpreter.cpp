@@ -192,6 +192,23 @@ void Interpreter::interpret(const std::vector<std::unique_ptr<Stmt>>& statements
     }
 }
 
+std::any Interpreter::visitVariableExpr(Variable& expr) {
+    return environment.get(expr.name);
+}
+
+void Interpreter::visitVarStmt(Var& stmt) {
+    // 1. Default to Lox's 'nil' (uninitialized state)
+    std::any value = std::monostate{}; 
+
+    // 2. If the user provided math/text (var a = 5;), evaluate it!
+    if (stmt.initializer != nullptr) {
+        value = evaluate(stmt.initializer.get());
+    }
+
+    // 3. Store it in our memory bank using the variable's string name
+    environment.define(stmt.name.lexeme, std::move(value));
+}
+
 void Interpreter::visitPrintStmt(Print& stmt) {
     // 1. Evaluate the inner expression to get the raw value
     std::any value = evaluate(stmt.expression.get());
