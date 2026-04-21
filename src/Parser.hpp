@@ -44,9 +44,11 @@ private:
     std::unique_ptr<Expr> unary();
     std::unique_ptr<Expr> primary();
 
+    std::unique_ptr<Stmt> declaration();
+    std::unique_ptr<Stmt> varDeclaration();
+
 public:
     Parser(const std::vector<Token>& tokens);
-    
     
     std::vector<std::unique_ptr<Stmt>> parse();
 };

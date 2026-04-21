@@ -183,7 +183,7 @@ std::vector<std::unique_ptr<Stmt>> Parser::parse() {
     std::vector<std::unique_ptr<Stmt>> statements;
     
     while (!isAtEnd()) {
-        statements.push_back(statement());
+        statements.push_back(declarations());
     }
 
     return statements;
@@ -216,4 +216,31 @@ std::unique_ptr<Stmt> Parser::statement() {
         return printStatement();
     }
     return expressionStatement();
+}
+
+std::unique_ptr<Stmt> Parser::varDeclaration() {
+    // 1. Grab the variable name
+    Token name = consume(TokenType::IDENTIFIER, "Expect variable name.");
+
+    // 2. Check for an initializer
+    std::unique_ptr<Expr> initializer = nullptr;
+    if (match({TokenType::EQUAL})) {
+        initializer = expression();
+    }
+
+    // 3. Demand the semicolon
+    consume(TokenType::SEMICOLON, "Expect ';' after variable declaration.");
+    
+    // 4. Return the new AST node!
+    return std::make_unique<Var>(std::move(name), std::move(initializer));
+}
+
+std::unique_ptr<Stmt> Parser::declaration() {
+    try {
+        if (match({TokenType::VAR})) return varDeclaration();
+        return statement();
+    } catch (ParseError error) {
+        synchronize();
+        return nullptr;
+    }
 }
