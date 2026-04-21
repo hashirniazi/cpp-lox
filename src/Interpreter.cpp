@@ -92,6 +92,11 @@ std::any Interpreter::evaluate(Expr* expr) {
     return expr->accept(*this);
 }
 
+// Kick off Visitor for Statements
+void Interpreter::execute(Stmt* stmt) {
+    stmt->accept(*this);
+}
+
 // Grouping just evaluates whatever is inside the parentheses
 std::any Interpreter::visitGrouping(Grouping& expr) {
     return evaluate(expr.expression.get());
@@ -177,11 +182,27 @@ std::any Interpreter::visitBinary(Binary& expr) {
     return std::any(); // Unreachable
 }
 
-void Interpreter::interpret(Expr* expression) {
+void Interpreter::interpret(const std::vector<std::unique_ptr<Stmt>>& statements) {
     try {
-        std::any value = evaluate(expression);
-        std::cout << stringify(value) << "\n";
+        for (const auto& statement : statements) {
+            execute(statement.get());
+        }
     } catch (const RuntimeError& error) {
-        runtimeError(error); // Call our global function instead!
+        runtimeError(error);
     }
+}
+
+void Interpreter::visitPrintStmt(Print& stmt) {
+    // 1. Evaluate the inner expression to get the raw value
+    std::any value = evaluate(stmt.expression.get());
+    
+    // 2. Convert that value to a string and print it to the console
+    std::cout << stringify(value) << "\n";
+}
+
+void Interpreter::visitExpressionStmt(Expression& stmt) {
+    // We evaluate the expression so any side-effects (like math or future function calls) happen.
+    // Notice we do NOT save the returned std::any value. It immediately falls out of 
+    // scope and C++ automatically destroys it for us!
+    evaluate(stmt.expression.get());
 }
