@@ -8,6 +8,7 @@
 class Expression; 
 class Print;
 class Var;
+class Block;
 
 // The Visitor interface for Statements (Returns void!)
 class StmtVisitor {
@@ -16,6 +17,7 @@ public:
     virtual void visitPrintStmt(Print& stmt) = 0;
     virtual void visitVarStmt(Var& stmt) = 0;
     virtual ~StmtVisitor() = default;
+    virtual void visitBlockStmt(Block& stmt) = 0;
 };
 
 // The base Statement class
