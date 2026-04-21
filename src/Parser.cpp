@@ -210,3 +210,10 @@ std::unique_ptr<Stmt> Parser::expressionStatement() {
     // 3. Package it up in our new Expression node
     return std::make_unique<Expression>(std::move(expr));
 }
+
+std::unique_ptr<Stmt> Parser::statement() {
+    if (match({TokenType::PRINT})) {
+        return printStatement();
+    }
+    return expressionStatement();
+}
