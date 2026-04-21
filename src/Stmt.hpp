@@ -7,6 +7,7 @@
 // Forward declarations so the classes know about each other
 class Expression; 
 class Print;
+class Var;
 
 // The Visitor interface for Statements (Returns void!)
 class StmtVisitor {
