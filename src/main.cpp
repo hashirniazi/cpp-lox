@@ -45,25 +45,29 @@ void run(const std::string& source) {
     std::vector<Token> tokens = scanner.scanTokens();
 
     Parser parser(tokens);
-    std::unique_ptr<Expr> expression = parser.parse();
+    std::vector<std::unique_ptr<Stmt>> statements = parser.parse();
 
-    if (hadError || expression == nullptr) {
+    if (hadError) {
         return; 
     }
+    interpreter.interpret(statements);
+}
 
 void runFile(const std::string& path) {
     std::ifstream file(path);
     if (!file.is_open()) {
         std::cerr << "Could not open file: " << path << "\n";
-        exit(74); // EX_IOERR
+        exit(74);
     }
 
     std::stringstream buffer;
     buffer << file.rdbuf();
     run(buffer.str());
 
-    // Indicate an error in the exit code.
-    if (hadError) exit(65); // EX_DATAERR
+    // Exit 65 for syntax errors
+    if (hadError) exit(65); 
+    // Exit 70 for runtime errors (like type mismatches)
+    if (hadRuntimeError) exit(70); 
 }
 
 void runPrompt() {
@@ -71,10 +75,13 @@ void runPrompt() {
     for (;;) {
         std::cout << "> ";
         if (!std::getline(std::cin, line)) {
-            break; // Exit loop on EOF (Ctrl+D)
+            break; 
         }
         run(line);
-        hadError = false; // Reset the error flag in the interactive loop
+        
+        // Reset BOTH flags so the user can keep typing after a mistake
+        hadError = false; 
+        hadRuntimeError = false; 
     }
 }
 
