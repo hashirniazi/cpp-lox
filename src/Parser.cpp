@@ -174,6 +174,9 @@ std::unique_ptr<Expr> Parser::primary() {
         
         return std::make_unique<Grouping>(std::move(expr));
     }
+    if (match({TokenType::IDENTIFIER})) {
+    return std::make_unique<Variable>(previous());
+    }
 
     // If we get here, the token doesn't start any known expression!
     throw error(peek(), "Expect expression.");
