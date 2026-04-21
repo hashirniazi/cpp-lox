@@ -186,7 +186,7 @@ std::vector<std::unique_ptr<Stmt>> Parser::parse() {
     std::vector<std::unique_ptr<Stmt>> statements;
     
     while (!isAtEnd()) {
-        statements.push_back(declarations());
+        statements.push_back(declaration());
     }
 
     return statements;
