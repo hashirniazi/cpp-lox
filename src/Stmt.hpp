@@ -13,6 +13,7 @@ class StmtVisitor {
 public:
     virtual void visitExpressionStmt(Expression& stmt) = 0;
     virtual void visitPrintStmt(Print& stmt) = 0;
+    virtual void visitVarStmt(Var& stmt) = 0;
     virtual ~StmtVisitor() = default;
 };
 
@@ -44,6 +45,19 @@ public:
 
     void accept(StmtVisitor& visitor) override {
         visitor.visitExpressionStmt(*this);
+    }
+};
+
+class Var : public Stmt {
+public:
+    Token name;
+    std::unique_ptr<Expr> initializer; // Can be nullptr if uninitialized!
+
+    Var(Token name, std::unique_ptr<Expr> initializer)
+        : name(std::move(name)), initializer(std::move(initializer)) {}
+
+    void accept(StmtVisitor& visitor) override {
+        visitor.visitVarStmt(*this);
     }
 };
 
