@@ -11,15 +11,8 @@
 #include "Expr.hpp"
 #include "Stmt.hpp"    // We MUST include our new Statement file!
 #include "Token.hpp"   
-
-// Our custom runtime error that stores the token where the error happened
-class RuntimeError : public std::runtime_error {
-public:
-    const Token token;
-    
-    RuntimeError(const Token& token, const std::string& message)
-        : std::runtime_error(message), token(token) {}
-};
+#include "RuntimeError.hpp"
+#include "Environment.hpp"
 
 // MULTIPLE INHERITANCE: We act as both an Expression Visitor AND a Statement Visitor
 class Interpreter : public Visitor, public StmtVisitor {
@@ -29,7 +22,8 @@ public:
     std::any visitGrouping(Grouping& expr) override;
     std::any visitUnary(Unary& expr) override;
     std::any visitBinary(Binary& expr) override;
-
+    void visitVarStmt(Var& stmt) override;
+    
     // --- Statement Visitor Methods ---
     void visitPrintStmt(Print& stmt) override; 
     void visitExpressionStmt(Expression& stmt) override;
@@ -37,6 +31,8 @@ public:
     void interpret(const std::vector<std::unique_ptr<Stmt>>& statements);
 
 private:
+    Environment environment;
+
     std::any evaluate(Expr* expr);
     void execute(Stmt* stmt);
 
