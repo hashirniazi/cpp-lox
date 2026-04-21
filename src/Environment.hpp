@@ -10,35 +10,48 @@
 class Environment {
 private:
     std::unordered_map<std::string, std::any> values;
+    Environment* enclosing; // <-- The link to the parent!
 
 public:
-    // Adds a new variable to the map
+    // Global scope constructor (no parent)
+    Environment() : enclosing(nullptr) {}
+
+    // Local scope constructor (has a parent)
+    Environment(Environment* enclosing) : enclosing(enclosing) {}
+
+    // Define remains exactly the same!
     void define(const std::string& name, std::any value) {
         values[name] = std::move(value);
     }
 
-    // Looks up a variable by its Token name
     std::any get(const Token& name) {
         auto elem = values.find(name.lexeme);
         if (elem != values.end()) {
             return elem->second;
         }
 
-        // If the variable doesn't exist, we crash the program!
+        // NEW: If we didn't find it locally, check the parent!
+        if (enclosing != nullptr) {
+            return enclosing->get(name);
+        }
+
         throw RuntimeError(name, "Undefined variable '" + name.lexeme + "'.");
     }
 
-    // Updates an existing variable
     void assign(const Token& name, std::any value) {
         if (values.find(name.lexeme) != values.end()) {
             values[name.lexeme] = std::move(value);
             return;
         }
 
-        // If it doesn't exist, we refuse to create it and crash!
+        // NEW: If we didn't find it locally, tell the parent to assign it!
+        if (enclosing != nullptr) {
+            enclosing->assign(name, std::move(value));
+            return;
+        }
+
         throw RuntimeError(name, "Undefined variable '" + name.lexeme + "'.");
     }
-    
 };
 
 #endif
