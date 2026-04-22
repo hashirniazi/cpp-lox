@@ -284,3 +284,9 @@ std::any Interpreter::visitLogicalExpr(Logical& expr) {
     // If we didn't short-circuit, we have to evaluate and return the right side
     return evaluate(expr.right.get());
 }
+
+void Interpreter::visitWhileStmt(While& stmt) {
+    while (isTruthy(evaluate(stmt.condition.get()))) {
+        execute(stmt.body.get());
+    }
+}
