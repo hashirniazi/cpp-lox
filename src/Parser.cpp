@@ -87,7 +87,31 @@ void Parser::synchronize() {
 
 // The very top rule just kicks things off
 std::unique_ptr<Expr> Parser::expression() {
-    return equality();
+    return assignment();
+}
+
+std::unique_ptr<Expr> Parser::assignment() {
+    // 1. Parse the left side as a normal expression
+    std::unique_ptr<Expr> expr = equality();
+
+    // 2. If we find an '=' sign, we know it's actually an assignment!
+    if (match({TokenType::EQUAL})) {
+        Token equals = previous();
+        
+        // 3. Recursively call assignment() to get the right side (for a = b = 5)
+        std::unique_ptr<Expr> value = assignment();
+
+        // 4. Check if the left side was a valid variable name
+        if (Variable* v = dynamic_cast<Variable*>(expr.get())) {
+            Token name = v->name;
+            return std::make_unique<Assign>(std::move(name), std::move(value));
+        }
+
+        // 5. If it wasn't a variable, throw an error!
+        error(equals, "Invalid assignment target.");
+    }
+
+    return expr;
 }
 
 // Translates: equality -> comparison ( ( "!=" | "==" ) comparison )* ;
@@ -218,6 +242,10 @@ std::unique_ptr<Stmt> Parser::statement() {
     if (match({TokenType::PRINT})) {
         return printStatement();
     }
+    // NEW: If we see a '{', parse a block!
+    if (match({TokenType::LEFT_BRACE})) {
+        return std::make_unique<Block>(block());
+    }
     return expressionStatement();
 }
 
@@ -246,4 +274,15 @@ std::unique_ptr<Stmt> Parser::declaration() {
         synchronize();
         return nullptr;
     }
+}
+
+std::vector<std::unique_ptr<Stmt>> Parser::block() {
+    std::vector<std::unique_ptr<Stmt>> statements;
+
+    while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+        statements.push_back(declaration());
+    }
+
+    consume(TokenType::RIGHT_BRACE, "Expect '}' after block.");
+    return statements;
 }

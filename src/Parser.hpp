@@ -37,6 +37,7 @@ private:
     std::unique_ptr<Stmt> expressionStatement();
 
     std::unique_ptr<Expr> expression();
+    std::unique_ptr<Expr> assignment();
     std::unique_ptr<Expr> equality();
     std::unique_ptr<Expr> comparison();
     std::unique_ptr<Expr> term();
@@ -46,6 +47,7 @@ private:
 
     std::unique_ptr<Stmt> declaration();
     std::unique_ptr<Stmt> varDeclaration();
+    std::vector<std::unique_ptr<Stmt>> block();
 
 public:
     Parser(const std::vector<Token>& tokens);
