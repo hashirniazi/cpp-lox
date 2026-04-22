@@ -9,6 +9,7 @@ class Expression;
 class Print;
 class Var;
 class Block;
+class If;
 
 // The Visitor interface for Statements (Returns void!)
 class StmtVisitor {
@@ -18,6 +19,7 @@ public:
     virtual void visitVarStmt(Var& stmt) = 0;
     virtual ~StmtVisitor() = default;
     virtual void visitBlockStmt(Block& stmt) = 0;
+    virtual void visitIfStmt(If& stmt) = 0;
 };
 
 // The base Statement class
@@ -73,6 +75,20 @@ public:
 
     void accept(StmtVisitor& visitor) override {
         visitor.visitBlockStmt(*this);
+    }
+};
+
+class If : public Stmt {
+public:
+    std::unique_ptr<Expr> condition;
+    std::unique_ptr<Stmt> thenBranch;
+    std::unique_ptr<Stmt> elseBranch;
+
+    If(std::unique_ptr<Expr> condition, std::unique_ptr<Stmt> thenBranch, std::unique_ptr<Stmt> elseBranch)
+        : condition(std::move(condition)), thenBranch(std::move(thenBranch)), elseBranch(std::move(elseBranch)) {}
+
+    void accept(StmtVisitor& visitor) override {
+        visitor.visitIfStmt(*this);
     }
 };
 
