@@ -91,8 +91,7 @@ std::unique_ptr<Expr> Parser::expression() {
 }
 
 std::unique_ptr<Expr> Parser::assignment() {
-    // 1. Parse the left side as a normal expression
-    std::unique_ptr<Expr> expr = equality();
+    std::unique_ptr<Expr> expr = logic_or();
 
     // 2. If we find an '=' sign, we know it's actually an assignment!
     if (match({TokenType::EQUAL})) {
@@ -297,4 +296,40 @@ std::unique_ptr<Stmt> Parser::ifStatement() {
     }
 
     return std::make_unique<If>(std::move(condition), std::move(thenBranch), std::move(elseBranch));
+}
+
+std::unique_ptr<Expr> Parser::logic_or() {
+    // 1. Grab the left side by looking exactly one step down the ladder
+    std::unique_ptr<Expr> expr = logic_and();
+
+    // 2. Loop as long as we see 'or' operators
+    while (match({TokenType::OR})) {
+        Token op = previous();
+        
+        // 3. Grab the right side by looking down the ladder again!
+        std::unique_ptr<Expr> right = logic_and();
+        
+        // 4. Bundle it all into our new Logical AST node
+        expr = std::make_unique<Logical>(std::move(expr), std::move(op), std::move(right));
+    }
+
+    return expr;
+}
+
+std::unique_ptr<Expr> Parser::logic_and() {
+    // 1. Grab the left side by looking exactly one step down the ladder
+    std::unique_ptr<Expr> expr = equality();
+
+    // 2. Loop as long as we see 'and' operators
+    while (match({TokenType::AND})) {
+        Token op = previous();
+        
+        // 3. Grab the right side by looking down the ladder again
+        std::unique_ptr<Expr> right = equality();
+        
+        // 4. Bundle it into our Logical AST node
+        expr = std::make_unique<Logical>(std::move(expr), std::move(op), std::move(right));
+    }
+
+    return expr;
 }
