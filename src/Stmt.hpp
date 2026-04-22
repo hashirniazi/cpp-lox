@@ -64,4 +64,16 @@ public:
     }
 };
 
+class Block : public Stmt {
+public:
+    std::vector<std::unique_ptr<Stmt>> statements;
+
+    Block(std::vector<std::unique_ptr<Stmt>> statements)
+        : statements(std::move(statements)) {}
+
+    void accept(StmtVisitor& visitor) override {
+        visitor.visitBlockStmt(*this);
+    }
+};
+
 #endif
