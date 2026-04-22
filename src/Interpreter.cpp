@@ -261,3 +261,11 @@ void Interpreter::visitBlockStmt(Block& stmt) {
     Environment local(environment);
     executeBlock(stmt.statements, &local);
 }
+
+void Interpreter::visitIfStmt(If& stmt) {
+    if (isTruthy(evaluate(stmt.condition.get()))) {
+        execute(stmt.thenBranch.get());
+    } else if (stmt.elseBranch != nullptr) {
+        execute(stmt.elseBranch.get());
+    }
+}
