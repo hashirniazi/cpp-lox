@@ -10,6 +10,7 @@ class Print;
 class Var;
 class Block;
 class If;
+class While;
 
 // The Visitor interface for Statements (Returns void!)
 class StmtVisitor {
@@ -20,6 +21,7 @@ public:
     virtual ~StmtVisitor() = default;
     virtual void visitBlockStmt(Block& stmt) = 0;
     virtual void visitIfStmt(If& stmt) = 0;
+    virtual void visitWhileStmt(While& stmt) = 0;
 };
 
 // The base Statement class
@@ -89,6 +91,19 @@ public:
 
     void accept(StmtVisitor& visitor) override {
         visitor.visitIfStmt(*this);
+    }
+};
+
+class While : public Stmt {
+public:
+    std::unique_ptr<Expr> condition;
+    std::unique_ptr<Stmt> body;
+
+    While(std::unique_ptr<Expr> condition, std::unique_ptr<Stmt> body)
+        : condition(std::move(condition)), body(std::move(body)) {}
+
+    void accept(StmtVisitor& visitor) override {
+        visitor.visitWhileStmt(*this);
     }
 };
 
