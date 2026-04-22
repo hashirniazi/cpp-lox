@@ -12,6 +12,7 @@ struct Literal;
 struct Unary;
 class Variable;
 class Assign;
+class Logical;
 
 struct Visitor {
     virtual ~Visitor() = default;
@@ -21,6 +22,8 @@ struct Visitor {
     virtual std::any visitUnary(Unary& expr) = 0;
     virtual std::any visitVariableExpr(Variable& expr) = 0;
     virtual std::any visitAssignExpr(Assign& expr) = 0;
+    virtual std::any visitLogicalExpr(Logical& expr) = 0;
+
 };
 
 struct Expr {
@@ -96,6 +99,20 @@ public:
 
     std::any accept(Visitor& visitor) override {
         return visitor.visitAssignExpr(*this);
+    }
+};
+
+class Logical : public Expr {
+public:
+    std::unique_ptr<Expr> left;
+    Token op;
+    std::unique_ptr<Expr> right;
+
+    Logical(std::unique_ptr<Expr> left, Token op, std::unique_ptr<Expr> right)
+        : left(std::move(left)), op(std::move(op)), right(std::move(right)) {}
+
+    std::any accept(Visitor& visitor) override {
+        return visitor.visitLogicalExpr(*this);
     }
 };
 
