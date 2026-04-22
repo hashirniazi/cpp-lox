@@ -48,7 +48,8 @@ private:
     std::unique_ptr<Stmt> declaration();
     std::unique_ptr<Stmt> varDeclaration();
     std::vector<std::unique_ptr<Stmt>> block();
-
+    
+    std::unique_ptr<Stmt> ifStatement();
 public:
     Parser(const std::vector<Token>& tokens);
     
