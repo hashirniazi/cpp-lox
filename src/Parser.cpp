@@ -333,3 +333,13 @@ std::unique_ptr<Expr> Parser::logic_and() {
 
     return expr;
 }
+
+std::unique_ptr<Stmt> Parser::whileStatement() {
+    consume(TokenType::LEFT_PAREN, "Expect '(' after 'while'.");
+    std::unique_ptr<Expr> condition = expression();
+    consume(TokenType::RIGHT_PAREN, "Expect ')' after condition.");
+    
+    std::unique_ptr<Stmt> body = statement();
+
+    return std::make_unique<While>(std::move(condition), std::move(body));
+}
