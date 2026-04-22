@@ -24,7 +24,9 @@ public:
     std::any visitBinary(Binary& expr) override;
     void visitVarStmt(Var& stmt) override;
     std::any visitVariableExpr(Variable& expr) override;
-    
+    std::any visitAssignExpr(Assign& expr) override;
+    void visitBlockStmt(Block& stmt) override;
+
     // --- Statement Visitor Methods ---
     void visitPrintStmt(Print& stmt) override; 
     void visitExpressionStmt(Expression& stmt) override;
@@ -32,11 +34,13 @@ public:
     void interpret(const std::vector<std::unique_ptr<Stmt>>& statements);
 
 private:
-    Environment environment;
+    Environment globals;
+    Environment* environment = &globals;
 
     std::any evaluate(Expr* expr);
     void execute(Stmt* stmt);
-
+    void executeBlock(const std::vector<std::unique_ptr<Stmt>>& statements, Environment* localEnvironment);
+    
     // Our helpers!
     bool isTruthy(const std::any& object);
     bool isEqual(const std::any& a, const std::any& b);

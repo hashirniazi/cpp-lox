@@ -193,7 +193,7 @@ void Interpreter::interpret(const std::vector<std::unique_ptr<Stmt>>& statements
 }
 
 std::any Interpreter::visitVariableExpr(Variable& expr) {
-    return environment.get(expr.name);
+    return environment->get(expr.name);
 }
 
 void Interpreter::visitVarStmt(Var& stmt) {
@@ -206,7 +206,7 @@ void Interpreter::visitVarStmt(Var& stmt) {
     }
 
     // 3. Store it in our memory bank using the variable's string name
-    environment.define(stmt.name.lexeme, std::move(value));
+    environment->define(stmt.name.lexeme, std::move(value));
 }
 
 void Interpreter::visitPrintStmt(Print& stmt) {
@@ -222,4 +222,42 @@ void Interpreter::visitExpressionStmt(Expression& stmt) {
     // Notice we do NOT save the returned std::any value. It immediately falls out of 
     // scope and C++ automatically destroys it for us!
     evaluate(stmt.expression.get());
+}
+
+std::any Interpreter::visitAssignExpr(Assign& expr) {
+    // 1. Evaluate the right side (the math/value)
+    std::any value = evaluate(expr.value.get());
+
+    // 2. Update the variable in our memory bank
+    environment->assign(expr.name, value);
+
+    // 3. Return the value
+    return value;
+}
+
+void Interpreter::executeBlock(const std::vector<std::unique_ptr<Stmt>>& statements, Environment* localEnvironment) {
+    // Save a pointer to the current environment
+    Environment* previous = this->environment;
+    
+    // Swap to the new local environment
+    this->environment = localEnvironment;
+
+    try {
+        // Execute all statements inside the block
+        for (const auto& stmt : statements) {
+            execute(stmt.get());
+        }
+        // Restore the environment if everything succeeded
+        this->environment = previous;
+    } catch (...) {
+        // If a runtime error is thrown, restore the environment BEFORE crashing!
+        this->environment = previous;
+        throw; 
+    }
+}
+
+void Interpreter::visitBlockStmt(Block& stmt) {
+    // Create a new local environment linked to our current active one
+    Environment local(environment);
+    executeBlock(stmt.statements, &local);
 }
