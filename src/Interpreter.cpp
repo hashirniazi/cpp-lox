@@ -269,3 +269,18 @@ void Interpreter::visitIfStmt(If& stmt) {
         execute(stmt.elseBranch.get());
     }
 }
+
+std::any Interpreter::visitLogicalExpr(Logical& expr) {
+    std::any left = evaluate(expr.left.get());
+
+    if (expr.op.type == TokenType::OR) {
+        // If it's OR and the left side is truthy, short-circuit and return left!
+        if (isTruthy(left)) return left;
+    } else {
+        // If it's AND and the left side is falsey, short-circuit and return left!
+        if (!isTruthy(left)) return left;
+    }
+
+    // If we didn't short-circuit, we have to evaluate and return the right side
+    return evaluate(expr.right.get());
+}

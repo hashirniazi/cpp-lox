@@ -27,10 +27,12 @@ public:
     std::any visitAssignExpr(Assign& expr) override;
     void visitBlockStmt(Block& stmt) override;
     void visitIfStmt(If& stmt) override;
-    
+
     // --- Statement Visitor Methods ---
     void visitPrintStmt(Print& stmt) override; 
     void visitExpressionStmt(Expression& stmt) override;
+
+    std::any visitLogicalExpr(Logical& expr) override;
 
     void interpret(const std::vector<std::unique_ptr<Stmt>>& statements);
 
