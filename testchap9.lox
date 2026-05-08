@@ -1,0 +1,73 @@
+print "--- 1. TRUTHINESS & IF/ELSE ---";
+// Lox rule: ONLY false and nil are falsey. Everything else is true!
+if (nil) print "FAIL"; else print "PASS: nil is falsey";
+if (false) print "FAIL"; else print "PASS: false is falsey";
+if ("") print "PASS: empty string is truthy"; else print "FAIL";
+if (0) print "PASS: 0 is truthy"; else print "FAIL";
+
+print "";
+print "--- 2. THE DANGLING ELSE ---";
+// The 'else' must bind to the closest 'if' (the inner one).
+if (true) 
+  if (false) 
+    print "FAIL: executed inner if"; 
+  else 
+    print "PASS: bound to the correct if!";
+
+print "";
+print "--- 3. LOGICAL OPERATORS (Returns) ---";
+// Lox returns the actual values, not 'true' or 'false'!
+print "hi" or 2;         // Expect: hi
+print nil or "yes";      // Expect: yes
+print "yes" and "done";  // Expect: done
+print false and "FAIL";  // Expect: false
+
+print "";
+print "--- 4. SHORT-CIRCUIT SURVIVAL ---";
+// If short-circuiting fails, the right side will evaluate and overwrite our variable!
+var survivor = "untouched";
+true or (survivor = "FAIL: right side of OR evaluated!");
+print survivor;          // Expect: untouched
+
+false and (survivor = "FAIL: right side of AND evaluated!");
+print survivor;          // Expect: untouched
+
+print "";
+print "--- 5. FOR LOOP SCOPE LEAK TEST ---";
+// A desugared for loop wraps the initializer in a block. 
+// If your desugaring is flawless, 'i' will not overwrite the global 'i'.
+var i = "global i";
+for (var i = 0; i < 3; i = i + 1) {
+  print i;               // Expect: 0, then 1, then 2
+}
+print i;                 // Expect: global i
+
+print "";
+print "--- 6. OPTIONAL FOR CLAUSES ---";
+var j = 0;
+for (; j < 2;) {
+  print j;               // Expect: 0, then 1
+  j = j + 1;
+}
+
+print "";
+print "--- 7. THE FINAL BOSS (Nested Chaos) ---";
+for (var a = 1; a <= 2; a = a + 1) {
+  if (a == 1) {
+    var b = 1;
+    while (b <= 2) {
+      if (b == 1 and a == 1) {
+        print "Start: a=" + a + ", b=" + b;
+      } else {
+        print "Loop: a=" + a + ", b=" + b;
+      }
+      b = b + 1;
+    }
+  } else {
+    print "End: a=" + a + " (skipped b loop)";
+  }
+}
+// Expect:
+// Start: a=1, b=1
+// Loop: a=1, b=2
+// End: a=2 (skipped b loop)

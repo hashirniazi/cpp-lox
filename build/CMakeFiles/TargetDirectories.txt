@@ -1,0 +1,3 @@
+/home/hashir/repos/cpp-lox/build/CMakeFiles/cpp_lox.dir
+/home/hashir/repos/cpp-lox/build/CMakeFiles/edit_cache.dir
+/home/hashir/repos/cpp-lox/build/CMakeFiles/rebuild_cache.dir

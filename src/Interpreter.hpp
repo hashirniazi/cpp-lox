@@ -31,7 +31,7 @@ public:
     // --- Statement Visitor Methods ---
     void visitPrintStmt(Print& stmt) override; 
     void visitExpressionStmt(Expression& stmt) override;
-    void visitWhileStmt(Wgile& stmt);
+    void visitWhileStmt(While& stmt);
     std::any visitLogicalExpr(Logical& expr) override;
 
     void interpret(const std::vector<std::unique_ptr<Stmt>>& statements);

@@ -238,8 +238,10 @@ std::unique_ptr<Stmt> Parser::expressionStatement() {
 }
 
 std::unique_ptr<Stmt> Parser::statement() {
+    if (match({TokenType::FOR})) return forStatement();
     if (match({TokenType::IF})) return ifStatement();
     if (match({TokenType::PRINT})) return printStatement();
+    if (match({TokenType::WHILE})) return whileStatement();
     if (match({TokenType::LEFT_BRACE})) return std::make_unique<Block>(block());
     
     return expressionStatement();
@@ -342,4 +344,63 @@ std::unique_ptr<Stmt> Parser::whileStatement() {
     std::unique_ptr<Stmt> body = statement();
 
     return std::make_unique<While>(std::move(condition), std::move(body));
+}
+
+std::unique_ptr<Stmt> Parser::forStatement() {
+    consume(TokenType::LEFT_PAREN, "Expect '(' after 'for'.");
+
+    // 1. Parse the Initializer
+    std::unique_ptr<Stmt> initializer;
+    if (match({TokenType::SEMICOLON})) {
+        initializer = nullptr;
+    } else if (match({TokenType::VAR})) {
+        initializer = varDeclaration();
+    } else {
+        initializer = expressionStatement();
+    }
+
+    // 2. Parse the Condition
+    std::unique_ptr<Expr> condition = nullptr;
+    if (!check(TokenType::SEMICOLON)) {
+        condition = expression();
+    }
+    consume(TokenType::SEMICOLON, "Expect ';' after loop condition.");
+
+    // 3. Parse the Increment
+    std::unique_ptr<Expr> increment = nullptr;
+    if (!check(TokenType::RIGHT_PAREN)) {
+        increment = expression();
+    }
+    consume(TokenType::RIGHT_PAREN, "Expect ')' after for clauses.");
+
+    // 4. Parse the Body
+    std::unique_ptr<Stmt> body = statement();
+
+    // --- DESUGARING START ---
+
+    // Step A: If there is an increment, append it to the end of the body.
+    if (increment != nullptr) {
+        std::vector<std::unique_ptr<Stmt>> statements;
+        statements.push_back(std::move(body));
+        statements.push_back(std::make_unique<Expression>(std::move(increment)));
+        body = std::make_unique<Block>(std::move(statements));
+    }
+
+    // Step B: Take the condition and the body and build a standard While loop.
+    if (condition == nullptr) {
+        // If the user left the condition blank (e.g., for(;;)), default to true!
+        condition = std::make_unique<Literal>(true);
+    }
+    body = std::make_unique<While>(std::move(condition), std::move(body));
+
+    // Step C: If there is an initializer, wrap the initializer and the While loop in one final Block.
+    if (initializer != nullptr) {
+        std::vector<std::unique_ptr<Stmt>> statements;
+        statements.push_back(std::move(initializer));
+        statements.push_back(std::move(body));
+        body = std::make_unique<Block>(std::move(statements));
+    }
+
+    // Return the fully desugared AST node!
+    return body;
 }

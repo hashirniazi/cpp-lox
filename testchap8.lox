@@ -1,0 +1,27 @@
+// 1. Global variables and math
+var a = 10;
+var b = 20;
+print "Global a + b:";
+print a + b; 
+
+// 2. Assignment
+a = a + 5;
+print "Updated global a:";
+print a; 
+
+// 3. Blocks and Scope Shadowing
+var c = "global c";
+{
+  var c = "block c";
+  var d = "block d";
+  print "Inside block:";
+  print c; 
+  print d; 
+
+  // 4. Assignment inside a block
+  a = 99;
+}
+
+print "Outside block:";
+print c; 
+print a;
